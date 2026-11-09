@@ -707,9 +707,10 @@ class PlannerFrame extends JFrame {
         }
     }
 
+    /** Sets the value label of a dashboard card; the labels are named "stat:" + card title in dashboard(). */
     private void setStat(Container c, String key, int val) {
         for (Component x : c.getComponents()) {
-            if (x instanceof JLabel && key.equals(x.getName())) ((JLabel) x).setText("" + val);
+            if (x instanceof JLabel && ("stat:" + key).equals(x.getName())) ((JLabel) x).setText("" + val);
             if (x instanceof Container) setStat((Container) x, key, val);
         }
     }
