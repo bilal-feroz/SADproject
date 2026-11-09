@@ -130,7 +130,9 @@ class DataStore {
         if (!file.exists()) {
             return new PlannerData();
         }
-        try (ObjectInputStream in = new ObjectInputStream(new FileInputStream(file))) {
+        // The FileInputStream is its own resource so it is closed even when ObjectInputStream rejects the
+        // file header; otherwise the file stays open and Windows refuses to rename it to *.corrupt below.
+        try (FileInputStream fin = new FileInputStream(file); ObjectInputStream in = new ObjectInputStream(fin)) {
             return (PlannerData) in.readObject();
         } catch (Exception e) {
             File bad = new File(file.getPath() + ".corrupt");
