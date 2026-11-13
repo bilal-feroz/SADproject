@@ -1,0 +1,77 @@
+@startuml
+' Class diagram of the final analysis document (section 5.3), as implemented in src/studyplanner.
+' Only the attributes and operations named in the document are shown; the code adds getters, setters and helpers.
+title Study Planner and Exam Scheduler - class diagram
+skinparam classAttributeIconSize 0
+hide empty members
+
+class StorageManager <<boundary>> {
+  - dbPathOrJsonFile : String
+  + saveAll(courses : List<Course>) : void
+  + loadAll() : List<Course>
+}
+
+class ScheduleEngine <<control>> {
+  - maxDailyHoursLimit : double
+  + generateDailyBlocks(items : List<AcademicItem>) : List<StudyBlock>
+  + detectConflicts(items : List<AcademicItem>, blocks : List<StudyBlock>) : List<String>
+}
+
+class Course <<entity>> {
+  - courseCode : String
+  - courseName : String
+  - items : List<AcademicItem>
+  + addAcademicItem(item : AcademicItem) : void
+  + getRemainingCourseHours() : double
+  + getCompletedTaskCount() : int
+}
+
+abstract class AcademicItem <<abstract>> {
+  - id : String
+  - title : String
+  - dueDate : LocalDate
+  - estimatedHours : double
+  - completedHours : double
+  - isCompleted : boolean
+  + getRemainingHours() : double
+  + calculateDailyHours(today : LocalDate) : double
+  + markCompleted() : void
+  + {abstract} getItemCategory() : String
+}
+
+class Assignment {
+  - complexityLevel : int
+  + getItemCategory() : String
+  + calculateDailyHours(today : LocalDate) : double
+}
+
+class Quiz {
+  - chapterNumber : int
+  + getItemCategory() : String
+  + calculateDailyHours(today : LocalDate) : double
+}
+
+class Exam {
+  - examDurationMinutes : int
+  - weightPercentage : double
+  + getItemCategory() : String
+  + calculateDailyHours(today : LocalDate) : double
+}
+
+class StudyBlock <<entity>> {
+  - blockId : String
+  - assignedDate : LocalDate
+  - allocatedHours : double
+  - isDone : boolean
+  - parentItem : AcademicItem
+  + markBlockDone() : void
+}
+
+StorageManager ..> Course : loads / saves
+ScheduleEngine ..> StudyBlock : creates
+Course "1" *-- "*" AcademicItem
+AcademicItem "1" -- "*" StudyBlock
+AcademicItem <|-- Assignment
+AcademicItem <|-- Quiz
+AcademicItem <|-- Exam
+@enduml
